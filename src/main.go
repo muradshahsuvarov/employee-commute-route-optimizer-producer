@@ -61,7 +61,7 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
 	var apiKey string = Config.Config{}.LoadConfig().HEREAPIKey[1]
 
-	var resp Response.Response = (&RouteFinder.RouteResponse{}).GetRouteFromAtoB(apiKey, bs.Mode,
+	var resp RouteFinder.RouteResponse = (&RouteFinder.RouteResponse{}).GetRouteFromAtoB(apiKey, bs.Mode,
 		bs.Waypoint1, bs.Waypoint2, bs.RouteMatch)
 
 	data, _ := json.Marshal(resp)

@@ -1,11 +1,14 @@
 package RouteFinder
 
 import (
+	"encoding/json"
 	"fmt"
+	"main/src/Consumer"
 	"main/src/Producer"
 	"main/src/Random"
 	"main/src/Response"
 	"strings"
+	"sync"
 )
 
 type RouteResponse struct {
@@ -72,30 +75,53 @@ type RouteResponse struct {
 	} `json:"response"`
 }
 
-// Return type must be RouteResponse
-func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint0 string, waypoint1 string, routeMatch int32) Response.Response {
-	var modeStr string = strings.Join(mode, ";")
-	var url string = fmt.Sprintf("https://routematching.hereapi.com/v8/match/routelinks?apiKey=%s&mode=%s&waypoint0=%s&waypoint1=%s&routeMatch=%d", apiKey, modeStr, waypoint0, waypoint1, routeMatch)
-	var id string = Random.GenerateRandomID(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+_)(*&^%$#@!)")
+func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint0 string, waypoint1 string, routeMatch int32) RouteResponse {
 
-	responseChannel := Producer.ProduceMessage(id, "localhost:9092", "ecro_req_topic", "HERE_API", url, "C:\\kafka\\config\\producer.properties")
+	var modeStr string = strings.Join(mode, ";")
+	var _url string = fmt.Sprintf("https://routematching.hereapi.com/v8/match/routelinks?apiKey=%s&mode=%s&waypoint0=%s&waypoint1=%s&routeMatch=%d", apiKey, modeStr, waypoint0, waypoint1, routeMatch)
+	var _id string = Random.GenerateRandomID(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+_)(*&^%$#@!)")
+	var _type string = "HERE_API"
+	var _server string = "localhost:9092"
+	var _topic string = "ecro_req_topic"
+	var _propertiesFile = "C:\\kafka\\config\\producer.properties"
+
+	responseChannel := Producer.ProduceMessage(_id, _server, _topic, _type, _url, _propertiesFile)
 	responseReceived := make(chan Response.Response) // Channel to receive the response
+
+	wg := sync.WaitGroup{}
 
 	go func() {
 		for {
 			select {
 			case res := <-responseChannel:
-				if res.Id == id {
+				if res.Id == _id {
 					responseReceived <- res // Send the response through the channel
-					return                  // Exit the goroutine after sending the response
+					close(responseReceived)
+					return // Exit the goroutine after sending the response
 				}
 			}
 		}
 	}()
 
+	var routeResponse RouteResponse = RouteResponse{}
+
 	output := <-responseReceived // Wait for the response to be received from the channel
 
-	return output
+	kResChan := Consumer.ConsumeMessages(_id, _type, _server, _topic, output.Partition, _propertiesFile)
+
+	wg.Add(1)
+	// Use a separate goroutine to consume messages from kResChan to avoid the infinite blocking possibilty
+	go func() {
+		for kafkaResponse := range kResChan {
+			var byteMessage []byte = []byte(kafkaResponse.Message)
+			json.Unmarshal(byteMessage, &routeResponse)
+			wg.Done()
+			return
+		}
+	}()
+	wg.Wait()
+
+	return routeResponse
 }
 
 // func (rr *RouteResponse) GetTheShortestLocation(apiKey string, mode []string, waitPoint string, waitPoints []string, routeMatch int) RouteResponse {

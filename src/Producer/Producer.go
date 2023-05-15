@@ -3,6 +3,7 @@ package Producer
 import (
 	"fmt"
 	"log"
+	"main/src/EscapeCharacter"
 	"main/src/Response"
 
 	"github.com/Shopify/sarama"
@@ -56,9 +57,11 @@ func ProduceMessage(_id string, _server string, _topic string, _messageType stri
 		}
 	}()
 
+	var escapedMessage string = EscapeCharacter.EscapeSpecialCharacters(_message)
+	
 	// Send a message to a Kafka topic
 	topic := _topic
-	message := "{\"id\":" + _id + ",\"type\":" + _messageType + ",\"message\":" + _message
+	message := fmt.Sprintf(`{"id":"%s","type":"%s","message":"%s"}`, _id, _messageType, escapedMessage)
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(message),
