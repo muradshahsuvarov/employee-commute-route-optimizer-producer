@@ -47,8 +47,8 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
 	type body_struct struct {
 		Mode       []string `json:"mode"`
-		Waypoint1  string   `json:"waypoint1"`
-		Waypoint2  string   `json:"waypoint2"`
+		Waypoint1  string   `json:"waypoint0"`
+		Waypoint2  string   `json:"waypoint1"`
 		RouteMatch int32    `json:"routematch"`
 	}
 
@@ -56,7 +56,7 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
 	err_1 := json.Unmarshal(r_body, &bs)
 
-	fmt.Println("MURAD 2")
+	fmt.Println("MURAD 2: ", bs)
 
 	if err_1 != nil {
 		log.Fatalf("Coudln't unmarshall the request body. Error: %s", err_1.Error())

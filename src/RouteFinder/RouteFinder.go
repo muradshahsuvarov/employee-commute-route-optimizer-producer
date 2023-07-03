@@ -84,7 +84,8 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 	var _id string = Random.GenerateRandomID(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+_)(*&^%$#@!)")
 	var _type string = "HERE_API"
 	var _server string = "localhost:9092"
-	var _topic string = "ecro_req_topic"
+	var _producer_topic string = "ecro_req_topic"
+	var _consumer_topic string = "ecro_res_topic"
 	var _producerPropertiesFile = "C:\\kafka\\config\\producer.properties"
 	var _consumerPropertiesFile = "C:\\kafka\\config\\consumer.properties"
 
@@ -97,12 +98,13 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 	var kResChan <-chan KafkaResponse.KafkaResponse = make(chan KafkaResponse.KafkaResponse)
 	var responseChannel <-chan Response.Response = make(chan Response.Response)
 
-	fmt.Printf("SURKHAY 4: %s %s %s %s %d %s \n", _id, _type, _server, _topic, 0, _consumerPropertiesFile)
+	fmt.Printf("SURKHAY 4: %s %s %s %s %d %s \n", _id, _type, _server, _producer_topic, 0, _consumerPropertiesFile)
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
 	go func() {
-		kResChan = Consumer.ConsumeMessages(_id, _type, _server, _topic, 0, _consumerPropertiesFile)
+		fmt.Println("SURKHAY 5 START")
+		kResChan = Consumer.ConsumeMessages(_id, _type, _server, _consumer_topic, 0, _consumerPropertiesFile)
 		for kafkaResponse := range kResChan {
 			fmt.Println("SURKHAY 5: ", kafkaResponse)
 			fmt.Println("SURKHAY 5: ", kafkaResponse.Message)
@@ -116,7 +118,7 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 
 	wg.Add(1)
 	go func() {
-		responseChannel = Producer.ProduceMessage(_id, _server, _topic, _type, _url, _producerPropertiesFile)
+		responseChannel = Producer.ProduceMessage(_id, _server, _producer_topic, _type, _url, _producerPropertiesFile)
 		select {
 		case res := <-responseChannel:
 			if res.Id == _id {
