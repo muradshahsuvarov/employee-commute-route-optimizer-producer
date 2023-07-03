@@ -31,6 +31,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Println("MURAD")
+
 	if r.Method != http.MethodPost {
 		log.Fatal("Method call has to be POST")
 		return
@@ -54,6 +56,8 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
 	err_1 := json.Unmarshal(r_body, &bs)
 
+	fmt.Println("MURAD 2")
+
 	if err_1 != nil {
 		log.Fatalf("Coudln't unmarshall the request body. Error: %s", err_1.Error())
 		return
@@ -61,8 +65,12 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 
 	var apiKey string = Config.Config{}.LoadConfig().HEREAPIKey[1]
 
+	fmt.Println("MURAD 3")
+
 	var resp RouteFinder.RouteResponse = (&RouteFinder.RouteResponse{}).GetRouteFromAtoB(apiKey, bs.Mode,
 		bs.Waypoint1, bs.Waypoint2, bs.RouteMatch)
+
+	fmt.Println("MURAD 4")
 
 	data, _ := json.Marshal(resp)
 
