@@ -37,7 +37,6 @@ func ProduceMessage(_id string, _server string, _topic string, _messageType stri
 	config.Producer.Retry.Max = cfg.Section("producer").Key("retry.max").MustInt(5)
 	config.Producer.Return.Successes = true // Set to true for SyncProducer
 
-	fmt.Println("MAMA 0")
 	// Create a new Kafka producer using the config
 	producer, err := sarama.NewSyncProducer([]string{_server}, config)
 	if err != nil {
@@ -60,7 +59,6 @@ func ProduceMessage(_id string, _server string, _topic string, _messageType stri
 
 	var escapedMessage string = EscapeCharacter.EscapeSpecialCharacters(_message)
 
-	fmt.Println("MAMA 1")
 	// Send a message to a Kafka topic
 	topic := _topic
 	message := fmt.Sprintf(`{"id":"%s","type":"%s","message":"%s"}`, _id, _messageType, escapedMessage)
@@ -92,6 +90,5 @@ func ProduceMessage(_id string, _server string, _topic string, _messageType stri
 		Error:     false,
 	}
 	responseChan <- res
-	fmt.Println("MAMA 2")
 	return responseChan
 }

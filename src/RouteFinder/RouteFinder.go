@@ -77,8 +77,6 @@ type RouteResponse struct {
 }
 
 func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint0 string, waypoint1 string, routeMatch int32) RouteResponse {
-
-	fmt.Println("SURKAY 1")
 	var modeStr string = strings.Join(mode, ";")
 	var _url string = fmt.Sprintf("https://routematching.hereapi.com/v8/match/routelinks?apiKey=%s&mode=%s&waypoint0=%s&waypoint1=%s&routeMatch=%d", apiKey, modeStr, waypoint0, waypoint1, routeMatch)
 	var _id string = Random.GenerateRandomID(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+_)(*&^%$#@!)")
@@ -88,49 +86,34 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 	var _consumer_topic string = "ecro_res_topic"
 	var _producerPropertiesFile = "C:\\kafka\\config\\producer.properties"
 	var _consumerPropertiesFile = "C:\\kafka\\config\\consumer.properties"
-
-	fmt.Println("SURKHAY 2")
-
 	var routeResponse RouteResponse = RouteResponse{}
-
-	fmt.Println("SURKHAY 3")
-
 	var kResChan <-chan KafkaResponse.KafkaResponse = make(chan KafkaResponse.KafkaResponse)
 	var responseChannel <-chan Response.Response = make(chan Response.Response)
-
-	fmt.Printf("SURKHAY 4: %s %s %s %s %d %s \n", _id, _type, _server, _producer_topic, 0, _consumerPropertiesFile)
 	wg := sync.WaitGroup{}
-
 	wg.Add(1)
 	go func() {
-		fmt.Println("SURKHAY 5 START")
 		kResChan = Consumer.ConsumeMessages(_id, _type, _server, _consumer_topic, 0, _consumerPropertiesFile)
 		for kafkaResponse := range kResChan {
-			fmt.Println("SURKHAY 5: ", kafkaResponse)
-			fmt.Println("SURKHAY 5: ", kafkaResponse.Message)
-			var byteMessage []byte = []byte(kafkaResponse.Message)
-			json.Unmarshal(byteMessage, &routeResponse)
+			err_0 := json.Unmarshal([]byte(kafkaResponse.Message), &routeResponse)
+			if err_0 != nil {
+				fmt.Println("Error unmarshalling byteMessage:", err_0)
+				return
+			}
 			wg.Done()
-			fmt.Println("SURKHAY 6: ", routeResponse)
 			return
 		}
 	}()
-
 	wg.Add(1)
 	go func() {
 		responseChannel = Producer.ProduceMessage(_id, _server, _producer_topic, _type, _url, _producerPropertiesFile)
 		select {
 		case res := <-responseChannel:
 			if res.Id == _id {
-				fmt.Println("SURKHAY 7: ", res)
 				wg.Done()
-				return // Exit the goroutine after sending the response
+				return
 			}
 		}
 	}()
-
-	fmt.Println("SURKHAY 8")
 	wg.Wait()
-	fmt.Println("--------------------DONE---------------------")
 	return routeResponse
 }
