@@ -1,6 +1,6 @@
 # Employee Commute Route Optimizer Producer
 
-The Route Finder API is a simple HTTP server that provides an interface to retrieve routes between two waypoints using the HERE API.
+ECRO Producer is an HTTP server that provides an interface to retrieve routes between two waypoints using the HERE API.
 
 ## Installation
 
