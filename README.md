@@ -7,7 +7,7 @@ The Route Finder API is a simple HTTP server that provides an interface to retri
 1. Clone the repository:
 
 ```shell
-git clone [<repository-url>](https://github.com/muradshahsuvarov/employee-commute-route-optimizer-producer)
+git clone https://github.com/muradshahsuvarov/employee-commute-route-optimizer-producer
 ```
 
 2. Install dependencies:
