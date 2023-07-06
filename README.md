@@ -7,7 +7,7 @@ The Route Finder API is a simple HTTP server that provides an interface to retri
 1. Clone the repository:
 
 ```shell
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/muradshahsuvarov/employee-commute-route-optimizer-producer)
 ```
 
 2. Install dependencies:
@@ -29,7 +29,7 @@ The application requires an API key from HERE to access the routing services. Fo
 1. Start the server:
 
 ```shell
-go run main.go
+go run src/main.go
 ```
 
 2. The server will start listening on port 8080. You can access the following endpoints:
