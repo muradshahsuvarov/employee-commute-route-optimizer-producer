@@ -13,17 +13,23 @@ import (
 
 var msg *sarama.ConsumerMessage
 
-func ConsumeMessages(_id string, _type string, _server string, _topic string, _partition int32, _propertiesFile string) <-chan KafkaResponse.KafkaResponse {
+func ConsumeMessages(_id string, _type string, _server string, _topic string, _partition int32) <-chan KafkaResponse.KafkaResponse {
 
 	// Declare KafkaResponse Channel
 	kResChan := make(chan KafkaResponse.KafkaResponse, 1)
 
-	// Load consumer properties from file
-	filePath := _propertiesFile
-	cfg, err_1 := ini.Load(filePath)
+	// The content of the consumer.properties file
+	consumerProperties := []byte(`
+		bootstrap.servers=172.18.0.3:9092
+		group.id=test-consumer-group
+		auto.offset.reset=latest
+	`)
 
+	// Load consumer properties from file
+	cfg, err_1 := ini.LoadSources(ini.LoadOptions{},
+		consumerProperties)
 	if err_1 != nil {
-		log.Fatalf("Failed to load consumer properties file: %v", err_1)
+		log.Fatalf("Failed to load consumer properties: %v", err_1)
 	}
 
 	// Create Kafka config using the loaded properties

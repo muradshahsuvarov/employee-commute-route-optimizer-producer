@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"main/src/Config"
+	"main/src/ConfigModule"
 	"main/src/Response"
 	"main/src/RouteFinder"
 	"net/http"
@@ -58,7 +58,7 @@ func getRouteFromAtoBHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var apiKey string = Config.Config{}.LoadConfig().HEREAPIKey[1]
+	var apiKey string = ConfigModule.ConfigModule{}.LoadConfig().HEREAPIKey[1]
 
 	var resp RouteFinder.RouteResponse = (&RouteFinder.RouteResponse{}).GetRouteFromAtoB(apiKey, bs.Mode,
 		bs.Waypoint1, bs.Waypoint2, bs.RouteMatch)
@@ -74,9 +74,9 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/getRouteFromAtoBHandler", getRouteFromAtoBHandler)
 
-	fmt.Println("Listening at port 8080...")
+	fmt.Println("Listening at port 8081...")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8081", nil); err != nil {
 		fmt.Println("Server couldn't start. Error:", err.Error())
 		return
 	}

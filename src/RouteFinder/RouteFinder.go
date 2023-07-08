@@ -84,15 +84,14 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 	var _server string = "localhost:9092"
 	var _producer_topic string = "ecro_req_topic"
 	var _consumer_topic string = "ecro_res_topic"
-	var _producerPropertiesFile = "C:\\kafka\\config\\producer.properties"
-	var _consumerPropertiesFile = "C:\\kafka\\config\\consumer.properties"
 	var routeResponse RouteResponse = RouteResponse{}
 	var kResChan <-chan KafkaResponse.KafkaResponse = make(chan KafkaResponse.KafkaResponse)
 	var responseChannel <-chan Response.Response = make(chan Response.Response)
+
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		kResChan = Consumer.ConsumeMessages(_id, _type, _server, _consumer_topic, 0, _consumerPropertiesFile)
+		kResChan = Consumer.ConsumeMessages(_id, _type, _server, _consumer_topic, 0)
 		for kafkaResponse := range kResChan {
 			err_0 := json.Unmarshal([]byte(kafkaResponse.Message), &routeResponse)
 			if err_0 != nil {
@@ -105,7 +104,7 @@ func (rr *RouteResponse) GetRouteFromAtoB(apiKey string, mode []string, waypoint
 	}()
 	wg.Add(1)
 	go func() {
-		responseChannel = Producer.ProduceMessage(_id, _server, _producer_topic, _type, _url, _producerPropertiesFile)
+		responseChannel = Producer.ProduceMessage(_id, _server, _producer_topic, _type, _url)
 		select {
 		case res := <-responseChannel:
 			if res.Id == _id {

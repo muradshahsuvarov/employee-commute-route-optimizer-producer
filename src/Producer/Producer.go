@@ -10,14 +10,20 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-func ProduceMessage(_id string, _server string, _topic string, _messageType string, _message string, _propertiesFile string) <-chan Response.Response {
+func ProduceMessage(_id string, _server string, _topic string, _messageType string, _message string) <-chan Response.Response {
 
 	// Response Channel
 	var responseChan chan Response.Response = make(chan Response.Response, 1)
 
+	// The content of the producer.properties file
+	producerProperties := []byte(`
+		bootstrap.servers=localhost:9092
+		compression.type=none
+	`)
+
 	// Load producer properties from file
-	filePath := _propertiesFile
-	cfg, err := ini.Load(filePath)
+	cfg, err := ini.LoadSources(ini.LoadOptions{},
+		producerProperties)
 	if err != nil {
 		log.Printf("Failed to load producer properties file: %v", err)
 		var res Response.Response = Response.Response{
