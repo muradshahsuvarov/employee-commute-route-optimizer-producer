@@ -20,7 +20,7 @@ func ConsumeMessages(_id string, _type string, _server string, _topic string, _p
 
 	// The content of the consumer.properties file
 	consumerProperties := []byte(`
-		bootstrap.servers=172.18.0.3:9092
+		bootstrap.servers=localhost:9092
 		group.id=test-consumer-group
 		auto.offset.reset=latest
 	`)
